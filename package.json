@@ -13,6 +13,7 @@
     "expo-linking": "~57.0.11",
     "expo-router": "~57.0.24",
     "expo-status-bar": "~57.0.1",
+    "jest-expo": "~57.0.5",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-hook-form": "^7.89.0",
@@ -27,6 +28,7 @@
   "devDependencies": {
     "@types/jest": "^30.0.0",
     "@types/react": "~19.2.2",
+    "jest": "^30.5.2",
     "typescript": "~6.0.3"
   },
   "scripts": {
