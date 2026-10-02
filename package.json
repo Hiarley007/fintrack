@@ -25,6 +25,7 @@
     "zod": "^4.6.5"
   },
   "devDependencies": {
+    "@types/jest": "^30.0.0",
     "@types/react": "~19.2.2",
     "typescript": "~6.0.3"
   },
@@ -37,12 +38,11 @@
     "typecheck": "tsc --noEmit",
     "format": "prettier --write \"app/**/*.{ts,tsx}\" \"src/**/*.{ts,tsx}\" \"__tests__/**/*.ts\""
   },
-
   "jest": {
-  "preset": "jest-expo",
-  "moduleNameMapper": {
-  "^@/(.*)$": "<rootDir>/src/$1"
-  }
-},
+    "preset": "jest-expo",
+    "moduleNameMapper": {
+      "^@/(.*)$": "<rootDir>/src/$1"
+    }
+  },
   "private": true
 }
