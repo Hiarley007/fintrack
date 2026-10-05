@@ -13,9 +13,7 @@ export interface DateRange {
 
 // ─── Consultas ───────────────────────────────────────────────────────────────
 
-export async function listTransactions(
-  range?: DateRange,
-): Promise<Transaction[]> {
+export async function listTransactions(range?: DateRange): Promise<Transaction[]> {
   let query = supabase
     .from('transactions')
     .select(SELECT)
@@ -47,9 +45,7 @@ export async function getTransaction(id: string): Promise<Transaction> {
 
 // ─── Mutações ────────────────────────────────────────────────────────────────
 
-export async function createTransaction(
-  input: TransactionInput,
-): Promise<void> {
+export async function createTransaction(input: TransactionInput): Promise<void> {
   // user_id é preenchido pelo banco (default auth.uid()).
   const { error } = await supabase.from('transactions').insert(input);
 
@@ -60,10 +56,7 @@ export async function updateTransaction(
   id: string,
   input: TransactionInput,
 ): Promise<void> {
-  const { error } = await supabase
-    .from('transactions')
-    .update(input)
-    .eq('id', id);
+  const { error } = await supabase.from('transactions').update(input).eq('id', id);
 
   if (error) throw error;
 }

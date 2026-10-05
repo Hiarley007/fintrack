@@ -1,6 +1,5 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Alert } from 'react-native';
-
+import { Alert, Platform } from 'react-native';
 
 import { Screen } from '@/components/Screen';
 import { ImportedTransactionForm } from '@/components/ImportedTransactionForm';
@@ -13,6 +12,16 @@ import {
   useTransaction,
 } from '@/hooks/useTransactions';
 import { friendlyError } from '@/utils/errors';
+
+// ─── Helpers (funcionam no web e no celular) ─────────────────────────────────
+
+function showMessage(title: string, message?: string) {
+  if (Platform.OS === 'web') {
+    window.alert(message ? `${title}\n\n${message}` : title);
+    return;
+  }
+  Alert.alert(title, message);
+}
 
 // ─── Tela ────────────────────────────────────────────────────────────────────
 
@@ -31,18 +40,24 @@ export default function EditTransactionScreen() {
     return <ErrorState message={friendlyError(error)} onRetry={refetch} />;
   }
 
+  function doDelete() {
+    remove.mutate(id, {
+      onSuccess: () => router.back(),
+      onError: (e) => showMessage('Erro ao excluir', friendlyError(e)),
+    });
+  }
+
   function confirmDelete() {
+    if (Platform.OS === 'web') {
+      if (window.confirm('Excluir lançamento\n\nEssa ação não pode ser desfeita.')) {
+        doDelete();
+      }
+      return;
+    }
+
     Alert.alert('Excluir lançamento', 'Essa ação não pode ser desfeita.', [
       { text: 'Cancelar', style: 'cancel' },
-      {
-        text: 'Excluir',
-        style: 'destructive',
-        onPress: () =>
-          remove.mutate(id, {
-            onSuccess: () => router.back(),
-            onError: (e) => Alert.alert('Erro ao excluir', friendlyError(e)),
-          }),
-      },
+      { text: 'Excluir', style: 'destructive', onPress: doDelete },
     ]);
   }
 
@@ -57,8 +72,7 @@ export default function EditTransactionScreen() {
               { id: data.id, categoryId },
               {
                 onSuccess: () => router.back(),
-                onError: (e) =>
-                  Alert.alert('Não foi possível salvar', friendlyError(e)),
+                onError: (e) => showMessage('Não foi possível salvar', friendlyError(e)),
               },
             )
           }
@@ -78,8 +92,7 @@ export default function EditTransactionScreen() {
             { id, input },
             {
               onSuccess: () => router.back(),
-              onError: (e) =>
-                Alert.alert('Não foi possível salvar', friendlyError(e)),
+              onError: (e) => showMessage('Não foi possível salvar', friendlyError(e)),
             },
           )
         }

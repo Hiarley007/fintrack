@@ -9,13 +9,7 @@ import { transactionSchema } from '@/schemas/transaction';
 import type { TransactionFormData } from '@/schemas/transaction';
 import { colors, radius, spacing } from '@/theme';
 import type { Transaction, TransactionInput, TransactionType } from '@/types';
-import {
-  addDaysISO,
-  brToISO,
-  isoToBr,
-  maskBrDate,
-  todayISO,
-} from '@/utils/date';
+import { addDaysISO, brToISO, isoToBr, maskBrDate, todayISO } from '@/utils/date';
 import { safeIcon } from '@/utils/icons';
 import { parseMoney, roundMoney, toInputMoney } from '@/utils/money';
 import { Button } from './Button';
@@ -153,9 +147,7 @@ export function TransactionForm({
                 color={selected ? '#FFFFFF' : category.color}
               />
 
-              <Text
-                style={[styles.chipText, selected && styles.chipTextSelected]}
-              >
+              <Text style={[styles.chipText, selected && styles.chipTextSelected]}>
                 {category.name}
               </Text>
             </Pressable>
@@ -221,9 +213,7 @@ function TypeButton({ label, value, current, onPick }: TypeButtonProps) {
       onPress={() => onPick(value)}
       style={[styles.typeButton, active && { backgroundColor: color }]}
     >
-      <Text style={[styles.typeText, active && styles.typeTextActive]}>
-        {label}
-      </Text>
+      <Text style={[styles.typeText, active && styles.typeTextActive]}>{label}</Text>
     </Pressable>
   );
 }

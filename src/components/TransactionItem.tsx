@@ -15,10 +15,7 @@ interface TransactionItemProps {
 
 // ─── Componente ──────────────────────────────────────────────────────────────
 
-export function TransactionItem({
-  transaction,
-  onPress,
-}: TransactionItemProps) {
+export function TransactionItem({ transaction, onPress }: TransactionItemProps) {
   const isIncome = transaction.type === 'income';
   const color = transaction.category?.color ?? colors.muted;
 
@@ -55,9 +52,7 @@ export function TransactionItem({
         </View>
       </View>
 
-      <Text
-        style={[styles.amount, { color: isIncome ? colors.income : colors.expense }]}
-      >
+      <Text style={[styles.amount, { color: isIncome ? colors.income : colors.expense }]}>
         {isIncome ? '+ ' : '- '}
         {formatMoney(transaction.amount)}
       </Text>

@@ -2,11 +2,7 @@ import { z } from 'zod';
 
 // ─── Campos compartilhados ───────────────────────────────────────────────────
 
-const email = z
-  .string()
-  .trim()
-  .min(1, 'Informe o e-mail')
-  .email('E-mail inválido');
+const email = z.string().trim().min(1, 'Informe o e-mail').email('E-mail inválido');
 
 // ─── Schemas ─────────────────────────────────────────────────────────────────
 

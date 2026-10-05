@@ -45,40 +45,37 @@ export function DonutChart({
 
   return (
     <View style={{ width: size, height: size }}>
-      <Svg width={size} height={size}>
-        <G rotation={-90} origin={`${center}, ${center}`}>
+    <Svg width={size} height={size}>
+      <G transform={`rotate(-90 ${center} ${center})`}>
+        <Circle
+          cx={center}
+          cy={center}
+          r={radius}
+          stroke={colors.border}
+          strokeWidth={strokeWidth}
+          fill="none"
+        />
+
+        {arcs.map((arc, index) => (
           <Circle
+            key={index}
             cx={center}
             cy={center}
             r={radius}
-            stroke={colors.border}
+            stroke={arc.color}
             strokeWidth={strokeWidth}
             fill="none"
+            strokeDasharray={`${arc.length} ${circumference - arc.length}`}
+            strokeDashoffset={-arc.offset}
           />
+        ))}
+      </G>
+    </Svg>
 
-          {arcs.map((arc, index) => (
-            <Circle
-              key={index}
-              cx={center}
-              cy={center}
-              r={radius}
-              stroke={arc.color}
-              strokeWidth={strokeWidth}
-              fill="none"
-              strokeDasharray={`${arc.length} ${circumference - arc.length}`}
-              strokeDashoffset={-arc.offset}
-            />
-          ))}
-        </G>
-      </Svg>
-
-      <View
-        style={[StyleSheet.absoluteFill, styles.center]}
-        pointerEvents="none"
-      >
-        {children}
-      </View>
+    <View style={[StyleSheet.absoluteFill, styles.center]} pointerEvents="none">
+      {children}
     </View>
+  </View>
   );
 }
 

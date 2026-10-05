@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Alert, Pressable, Share, StyleSheet, Text, View } from 'react-native';
+import { Alert, Platform, Pressable, Share, StyleSheet, Text, View } from 'react-native';
 
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
@@ -29,26 +29,52 @@ export default function ProfileScreen() {
       const all = await listTransactions();
 
       if (all.length === 0) {
-        Alert.alert('Nada para exportar', 'Registre lançamentos primeiro.');
+        if (Platform.OS === 'web') {
+          window.alert('Nada para exportar\n\nRegistre lançamentos primeiro.');
+        } else {
+          Alert.alert('Nada para exportar', 'Registre lançamentos primeiro.');
+        }
         return;
       }
 
-      await Share.share({ title: 'fintrack.csv', message: toCsv(all) });
+      if (Platform.OS === 'web') {
+        const blob = new Blob(['\uFEFF' + toCsv(all)], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'fintrack.csv';
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+      } else {
+        await Share.share({ title: 'fintrack.csv', message: toCsv(all) });
+      }
     } catch (error) {
-      Alert.alert('Erro ao exportar', friendlyError(error));
+      if (Platform.OS === 'web') {
+        window.alert(`Erro ao exportar\n\n${friendlyError(error)}`);
+      } else {
+        Alert.alert('Erro ao exportar', friendlyError(error));
+      }
     } finally {
       setExporting(false);
     }
   }
 
   function confirmSignOut() {
+    if (Platform.OS === 'web') {
+      if (window.confirm('Sair\n\nDeseja encerrar a sessão?')) {
+        signOut().catch((e) => window.alert(`Erro\n\n${friendlyError(e)}`));
+      }
+      return;
+    }
+
     Alert.alert('Sair', 'Deseja encerrar a sessão?', [
       { text: 'Cancelar', style: 'cancel' },
       {
         text: 'Sair',
         style: 'destructive',
-        onPress: () =>
-          signOut().catch((e) => Alert.alert('Erro', friendlyError(e))),
+        onPress: () => signOut().catch((e) => Alert.alert('Erro', friendlyError(e))),
       },
     ]);
   }
@@ -75,9 +101,7 @@ export default function ProfileScreen() {
 
         <View style={styles.bankInfo}>
           <Text style={styles.bankTitle}>Contas bancárias</Text>
-          <Text style={styles.bankText}>
-            Importe lançamentos via Open Finance
-          </Text>
+          <Text style={styles.bankText}>Importe lançamentos via Open Finance</Text>
         </View>
 
         <Ionicons name="chevron-forward" size={20} color={colors.muted} />
