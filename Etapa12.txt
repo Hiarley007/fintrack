@@ -1,0 +1,51 @@
+===============================================================================
+FINTRACK - RESUMO: INTEGRAÇÃO OPEN FINANCE E PLUGGY (CAPÍTULO 12)
+===============================================================================
+
+1. O QUE É OPEN FINANCE E POR QUE USAR AGREGADOR (PLUGGY)
+-------------------------------------------------------------------------------
+* Open Finance: Sistema regulado pelo Banco Central que permite ao usuário 
+  compartilhar dados bancários com apps via APIs padronizadas, com consentimento 
+  explícito, temporário e revogável.
+* Por que usar um Agregador (Pluggy)?
+  - Conectar direto com APIs dos bancos exige licença regulatória e homologação.
+  - O Pluggy fornece uma API única + Widget pronto, ideal para estudos e portfólio.
+
+2. FLUXO DE FUNCIONAMENTO NO FINTRACK
+-------------------------------------------------------------------------------
+1. App -> Pede um "Connect Token" (válido por 30 min) para a Edge Function.
+2. Edge Function -> Autentica no Pluggy com as credenciais secretas e gera o token.
+3. App -> Abre o Widget do Pluggy para o usuário autorizar a conexão.
+4. Widget -> Cria o "Item" (conexão) e retorna o item_id para o app.
+5. App -> Chama a Edge Function de sincronização passando o item_id.
+6. Edge Function -> Valida se a conexão pertence ao usuário logado, lê extratos 
+   no Pluggy, aplica regras de deduplicação e salva os novos lançamentos.
+
+* Regra de Ouro: O aplicativo NUNCA guarda ou envia credenciais secretas do Pluggy.
+  Toda comunicação sensível passa estritamente pelo servidor (Edge Functions).
+
+3. SEGURANÇA E PRIVACIDADE (BOAS PRÁTICAS)
+-------------------------------------------------------------------------------
+* Credenciais do Pluggy: Guardadas apenas nos Secrets do Supabase (NUNCA no .env).
+* Validação de Usuário: A função valida se clientUserId do Item bate com o ID 
+  do usuário logado (evita acesso a dados de terceiros; retorna 403 se diferir).
+* Dados Sensíveis: Somente leitura. O app não realiza transferências nem guarda 
+  dados bancários críticos (ex: saldo total, CPF ou dados da outra parte).
+* RLS (Row Level Security): Ativo no Supabase para garantir isolamento.
+* Revogação: Ao desconectar, a conexão no Pluggy e os lançamentos são removidos.
+
+4. DADOS DE TESTE (PLUGGY BANK)
+-------------------------------------------------------------------------------
+Para demonstrações e testes sem expor contas reais:
+- Banco: Pluggy Bank (disponível no modo sandbox/teste)
+- Usuário: user-ok
+- Senha: password-ok
+- Código MFA: 123456
+
+5. PASSO A PASSO DE CONFIGURAÇÃO INICIAL
+-------------------------------------------------------------------------------
+1. Criar conta de desenvolvedor em: dashboard.pluggy.ai
+2. Criar uma aplicação "FinTrack" para obter Client ID e Client Secret.
+3. Cadastrar os segredos no painel de Secrets do Supabase.
+4. Para dados reais próprios: usar meu.pluggy.ai (MeuPluggy).
+===============================================================================
