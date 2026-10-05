@@ -27,10 +27,10 @@ if (!url || !key) {
 
 export const supabase = createClient(url, key, {
   auth: {
-    storage: AsyncStorage,       // guarda a sessão no aparelho
-    autoRefreshToken: true,      // renova o token automaticamente
-    persistSession: true,        // mantém o login entre aberturas do app
-    detectSessionInUrl: false,   // não se aplica ao React Native
+    storage: AsyncStorage, // guarda a sessão no aparelho
+    autoRefreshToken: true, // renova o token automaticamente
+    persistSession: true, // mantém o login entre aberturas do app
+    detectSessionInUrl: false, // não se aplica ao React Native
   },
 });
 

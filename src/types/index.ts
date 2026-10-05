@@ -10,7 +10,7 @@ export interface Category {
   id: string;
   name: string;
   type: TransactionType;
-  icon: string;  // nome do ícone (Ionicons)
+  icon: string; // nome do ícone (Ionicons)
   color: string; // cor em hexadecimal
 }
 
@@ -25,7 +25,7 @@ export interface Transaction {
   type: TransactionType;
   description: string;
   amount: number;
-  date: string;       // AAAA-MM-DD
+  date: string; // AAAA-MM-DD
   created_at: string; // ISO 8601
 
   // Relação (vem do join com categories)
@@ -34,7 +34,7 @@ export interface Transaction {
   // Origem do lançamento
   source: TransactionSource;
   connection_id: string | null; // preenchido quando source = 'open_finance'
-  external_id: string | null;   // id da transação no banco/Pluggy
+  external_id: string | null; // id da transação no banco/Pluggy
   account_name: string | null;
 }
 
@@ -54,11 +54,11 @@ export interface BankConnection {
   status: 'connected' | 'error';
   last_error: string | null;
   last_synced_at: string | null; // ISO 8601
-  created_at: string;            // ISO 8601
+  created_at: string; // ISO 8601
 }
 
 export interface SyncResult {
   connection_id: string;
   imported: number; // lançamentos novos
-  fetched: number;  // lançamentos lidos do banco no período
+  fetched: number; // lançamentos lidos do banco no período
 }

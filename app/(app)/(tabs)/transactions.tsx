@@ -1,4 +1,3 @@
-
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import {
@@ -14,11 +13,7 @@ import {
 import { Fab } from '@/components/Fab';
 import { MonthSwitcher } from '@/components/MonthSwitcher';
 import { Screen } from '@/components/Screen';
-import {
-  EmptyState,
-  ErrorState,
-  LoadingView,
-} from '@/components/StateViews';
+import { EmptyState, ErrorState, LoadingView } from '@/components/StateViews';
 import { TransactionItem } from '@/components/TransactionItem';
 
 import { useTransactions } from '@/hooks/useTransactions';
@@ -50,14 +45,8 @@ export default function TransactionsScreen() {
   const [filter, setFilter] = useState<Filter>('all');
   const [query, setQuery] = useState('');
 
-  const {
-    data,
-    isLoading,
-    isError,
-    error,
-    refetch,
-    isRefetching,
-  } = useTransactions(month);
+  const { data, isLoading, isError, error, refetch, isRefetching } =
+    useTransactions(month);
 
   const groups = useMemo(
     () => groupByDate(filterTransactions(data ?? [], filter, query)),
@@ -67,20 +56,12 @@ export default function TransactionsScreen() {
   if (isLoading) return <LoadingView />;
 
   if (isError) {
-    return (
-      <ErrorState
-        message={friendlyError(error)}
-        onRetry={refetch}
-      />
-    );
+    return <ErrorState message={friendlyError(error)} onRetry={refetch} />;
   }
 
   const header = (
     <View style={styles.header}>
-      <MonthSwitcher
-        value={month}
-        onChange={setMonth}
-      />
+      <MonthSwitcher value={month} onChange={setMonth} />
 
       <TextInput
         value={query}
@@ -96,10 +77,7 @@ export default function TransactionsScreen() {
           <Pressable
             key={item.value}
             onPress={() => setFilter(item.value)}
-            style={[
-              styles.filter,
-              filter === item.value && styles.filterActive,
-            ]}
+            style={[styles.filter, filter === item.value && styles.filterActive]}
           >
             <Text
               style={[
@@ -129,9 +107,7 @@ export default function TransactionsScreen() {
             />
           }
           renderSectionHeader={({ section }) => (
-            <Text style={styles.day}>
-              {dayLabel(section.date)}
-            </Text>
+            <Text style={styles.day}>{dayLabel(section.date)}</Text>
           )}
           renderItem={({ item }) => (
             <TransactionItem
@@ -143,10 +119,7 @@ export default function TransactionsScreen() {
           contentContainerStyle={styles.content}
           keyboardShouldPersistTaps="handled"
           refreshControl={
-            <RefreshControl
-              refreshing={isRefetching}
-              onRefresh={refetch}
-            />
+            <RefreshControl refreshing={isRefetching} onRefresh={refetch} />
           }
         />
 

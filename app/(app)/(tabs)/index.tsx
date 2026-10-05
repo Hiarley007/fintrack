@@ -1,12 +1,6 @@
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
-import {
-  RefreshControl,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { Card } from '@/components/Card';
 import { DonutChart } from '@/components/DonutChart';
@@ -54,9 +48,7 @@ export default function DashboardScreen() {
             <RefreshControl refreshing={isRefetching} onRefresh={refetch} />
           }
         >
-          <Text style={styles.greeting}>
-            Olá{firstName ? `, ${firstName}` : ''}{' '}
-          </Text>
+          <Text style={styles.greeting}>Olá{firstName ? `, ${firstName}` : ''} </Text>
 
           <MonthSwitcher value={month} onChange={setMonth} />
 
@@ -76,25 +68,19 @@ export default function DashboardScreen() {
                   }))}
                 >
                   <Text style={styles.centerLabel}>Total</Text>
-                  <Text style={styles.centerValue}>
-                    {formatMoney(summary.expense)}
-                  </Text>
+                  <Text style={styles.centerValue}>{formatMoney(summary.expense)}</Text>
                 </DonutChart>
 
                 <View style={styles.legend}>
                   {summary.byCategory.slice(0, 6).map((c) => (
                     <View key={c.categoryId} style={styles.legendRow}>
-                      <View
-                        style={[styles.dot, { backgroundColor: c.color }]}
-                      />
+                      <View style={[styles.dot, { backgroundColor: c.color }]} />
 
                       <Text style={styles.legendName} numberOfLines={1}>
                         {c.name}
                       </Text>
 
-                      <Text style={styles.legendPercent}>
-                        {Math.round(c.percent)}%
-                      </Text>
+                      <Text style={styles.legendPercent}>{Math.round(c.percent)}%</Text>
                     </View>
                   ))}
                 </View>
@@ -104,18 +90,13 @@ export default function DashboardScreen() {
 
           <View style={styles.sectionHeader}>
             <Text style={styles.cardTitle}>Últimos lançamentos</Text>
-            <Text
-              style={styles.seeAll}
-              onPress={() => router.push('/transactions')}
-            >
+            <Text style={styles.seeAll} onPress={() => router.push('/transactions')}>
               Ver todos
             </Text>
           </View>
 
           {transactions.length === 0 ? (
-            <Text style={styles.empty}>
-              Toque no + para registrar o primeiro.
-            </Text>
+            <Text style={styles.empty}>Toque no + para registrar o primeiro.</Text>
           ) : (
             transactions
               .slice(0, 5)

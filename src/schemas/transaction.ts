@@ -25,9 +25,7 @@ export const transactionSchema = z.object({
 
   categoryId: z.string().min(1, 'Escolha uma categoria'),
 
-  date: z
-    .string()
-    .refine((v) => brToISO(v) !== null, 'Data inválida (DD/MM/AAAA)'),
+  date: z.string().refine((v) => brToISO(v) !== null, 'Data inválida (DD/MM/AAAA)'),
 });
 
 // ─── Tipos ───────────────────────────────────────────────────────────────────

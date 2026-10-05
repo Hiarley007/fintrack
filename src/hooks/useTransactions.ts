@@ -49,8 +49,7 @@ export function useSaveTransaction() {
   return useMutation({
     mutationFn: ({ id, input }: SaveVariables) =>
       id ? updateTransaction(id, input) : createTransaction(input),
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: ['transactions'] }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['transactions'] }),
   });
 }
 
@@ -59,8 +58,7 @@ export function useDeleteTransaction() {
 
   return useMutation({
     mutationFn: (id: string) => deleteTransaction(id),
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: ['transactions'] }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['transactions'] }),
   });
 }
 
@@ -70,7 +68,6 @@ export function useRecategorizeTransaction() {
   return useMutation({
     mutationFn: ({ id, categoryId }: { id: string; categoryId: string }) =>
       updateTransactionCategory(id, categoryId),
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: ['transactions'] }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['transactions'] }),
   });
 }
