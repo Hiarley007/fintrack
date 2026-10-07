@@ -30,8 +30,9 @@ const salary: Category = {
   color: '#16A34A',
 };
 
-/** Cria uma transação válida; só o `id` é obrigatório, o resto sobrescreve o padrão. */
-function make(partial: Partial<Transaction> & Pick<Transaction, 'id'>): Transaction {
+function make(
+  partial: Partial<Transaction> & Pick<Transaction, 'id'>,
+): Transaction {
   return {
     user_id: 'u1',
     category_id: 'c1',
@@ -48,6 +49,7 @@ function make(partial: Partial<Transaction> & Pick<Transaction, 'id'>): Transact
     ...partial,
   };
 }
+
 
 const salaryTx = make({
   id: '1',

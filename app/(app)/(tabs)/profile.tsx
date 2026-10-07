@@ -2,8 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Alert, Platform, Pressable, Share, StyleSheet, Text, View } from 'react-native';
-
+import { Alert, Pressable, Share, StyleSheet, Text, View } from 'react-native';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { Screen } from '@/components/Screen';
@@ -12,8 +11,6 @@ import { listTransactions } from '@/services/transaction';
 import { colors, radius, spacing } from '@/theme';
 import { toCsv } from '@/utils/csv';
 import { friendlyError } from '@/utils/errors';
-
-// ─── Tela ────────────────────────────────────────────────────────────────────
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -29,46 +26,19 @@ export default function ProfileScreen() {
       const all = await listTransactions();
 
       if (all.length === 0) {
-        if (Platform.OS === 'web') {
-          window.alert('Nada para exportar\n\nRegistre lançamentos primeiro.');
-        } else {
-          Alert.alert('Nada para exportar', 'Registre lançamentos primeiro.');
-        }
+        Alert.alert('Nada para exportar', 'Registre lançamentos primeiro.');
         return;
       }
 
-      if (Platform.OS === 'web') {
-        const blob = new Blob(['\uFEFF' + toCsv(all)], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = 'fintrack.csv';
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        URL.revokeObjectURL(url);
-      } else {
-        await Share.share({ title: 'fintrack.csv', message: toCsv(all) });
-      }
+      await Share.share({ title: 'fintrack.csv', message: toCsv(all) });
     } catch (error) {
-      if (Platform.OS === 'web') {
-        window.alert(`Erro ao exportar\n\n${friendlyError(error)}`);
-      } else {
-        Alert.alert('Erro ao exportar', friendlyError(error));
-      }
+      Alert.alert('Erro ao exportar', friendlyError(error));
     } finally {
       setExporting(false);
     }
   }
 
   function confirmSignOut() {
-    if (Platform.OS === 'web') {
-      if (window.confirm('Sair\n\nDeseja encerrar a sessão?')) {
-        signOut().catch((e) => window.alert(`Erro\n\n${friendlyError(e)}`));
-      }
-      return;
-    }
-
     Alert.alert('Sair', 'Deseja encerrar a sessão?', [
       { text: 'Cancelar', style: 'cancel' },
       {
@@ -124,8 +94,6 @@ export default function ProfileScreen() {
   );
 }
 
-// ─── Estilos ─────────────────────────────────────────────────────────────────
-
 const styles = StyleSheet.create({
   title: {
     fontSize: 26,
@@ -143,7 +111,11 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     marginBottom: spacing.sm,
   },
-  avatarText: { color: '#FFFFFF', fontSize: 30, fontWeight: '800' },
+  avatarText: {
+    color: '#FFFFFF',
+    fontSize: 30,
+    fontWeight: '800',
+  },
   name: {
     fontSize: 20,
     fontWeight: '700',
@@ -156,8 +128,12 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 2,
   },
-  action: { marginBottom: spacing.sm },
-  pressed: { opacity: 0.8 },
+  action: {
+    marginBottom: spacing.sm,
+  },
+  pressed: {
+    opacity: 0.8,
+  },
   bankRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -167,9 +143,19 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     marginBottom: spacing.md,
   },
-  bankInfo: { flex: 1 },
-  bankTitle: { fontSize: 16, fontWeight: '600', color: colors.text },
-  bankText: { fontSize: 13, color: colors.muted, marginTop: 2 },
+  bankInfo: {
+    flex: 1,
+  },
+  bankTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.text,
+  },
+  bankText: {
+    fontSize: 13,
+    color: colors.muted,
+    marginTop: 2,
+  },
   version: {
     textAlign: 'center',
     color: colors.muted,

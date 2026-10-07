@@ -37,6 +37,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
 /** Separa "AAAA-MM-DD" em números (mês de 1 a 12). */
 function parseISO(iso: string): [year: number, month: number, day: number] {
   const [y, m, d] = iso.split('-').map(Number);
+
   return [y, m, d];
 }
 
@@ -54,6 +55,7 @@ export function todayISO(): string {
 /** Soma (ou subtrai, se negativo) dias a uma data ISO. */
 export function addDaysISO(iso: string, days: number): string {
   const [y, m, d] = parseISO(iso);
+
   return toISO(new Date(y, m - 1, d + days));
 }
 
@@ -62,12 +64,14 @@ export function addDaysISO(iso: string, days: number): string {
 /** "2026-12-25" -> "25/12/2026" */
 export function isoToBr(iso: string): string {
   const [y, m, d] = iso.split('-');
+
   return `${d}/${m}/${y}`;
 }
 
 /** "25/12/2026" -> "2026-12-25". Retorna null se a data não existir. */
 export function brToISO(br: string): string | null {
   const match = BR_DATE.exec(br.trim());
+
   if (!match) return null;
 
   const [, dd, mm, yyyy] = match;
@@ -92,6 +96,7 @@ export function maskBrDate(text: string): string {
 
   if (digits.length <= 2) return digits;
   if (digits.length <= 4) return `${digits.slice(0, 2)}/${digits.slice(2)}`;
+
   return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
 }
 
@@ -99,22 +104,34 @@ export function maskBrDate(text: string): string {
 
 export function currentYearMonth(): YearMonth {
   const now = new Date();
-  return { year: now.getFullYear(), month: now.getMonth() + 1 };
+
+  return {
+    year: now.getFullYear(),
+    month: now.getMonth() + 1,
+  };
 }
 
 /** Avança (ou recua, se negativo) `delta` meses. */
 export function shiftMonth(ym: YearMonth, delta: number): YearMonth {
   // Converte para um índice contínuo de meses, soma e converte de volta.
   const index = ym.year * 12 + (ym.month - 1) + delta;
-  return { year: Math.floor(index / 12), month: (index % 12) + 1 };
+
+  return {
+    year: Math.floor(index / 12),
+    month: (index % 12) + 1,
+  };
 }
 
 /**
  * Intervalo [start, endExclusive) do mês, em AAAA-MM-DD.
  * O fim é exclusivo: é o dia 1 do mês seguinte.
  */
-export function monthRange(ym: YearMonth): { start: string; endExclusive: string } {
+export function monthRange(ym: YearMonth): {
+  start: string;
+  endExclusive: string;
+} {
   const next = shiftMonth(ym, 1);
+
   return {
     start: `${ym.year}-${pad(ym.month)}-01`,
     endExclusive: `${next.year}-${pad(next.month)}-01`,
@@ -132,6 +149,7 @@ export function monthLabel(ym: YearMonth): string {
 export function dayLabel(iso: string, today: string = todayISO()): string {
   if (iso === today) return 'Hoje';
   if (iso === addDaysISO(today, -1)) return 'Ontem';
+
   return isoToBr(iso).slice(0, 5);
 }
 
@@ -141,9 +159,11 @@ export function dayLabel(iso: string, today: string = todayISO()): string {
  */
 export function formatDateTime(isoDateTime: string): string {
   const date = new Date(isoDateTime);
+
   if (Number.isNaN(date.getTime())) return '';
 
   const day = `${pad(date.getDate())}/${pad(date.getMonth() + 1)}`;
   const time = `${pad(date.getHours())}:${pad(date.getMinutes())}`;
+
   return `${day} às ${time}`;
 }
