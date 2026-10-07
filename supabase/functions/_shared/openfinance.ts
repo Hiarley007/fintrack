@@ -114,13 +114,11 @@ const RULES_EXPENSE: [string, string][] = [
 const RULES_INCOME: [string, string][] = [
   [
     'Salário',
-    'salary|payroll|wage|salario|folha de pagamento|proventos|' +
-      'remuneracao',
+    'salary|payroll|wage|salario|folha de pagamento|proventos|' + 'remuneracao',
   ],
   [
     'Investimentos',
-    'investment|dividend|interest|yield|rendimento|juros|resgate|cdb|' +
-      'tesouro',
+    'investment|dividend|interest|yield|rendimento|juros|resgate|cdb|' + 'tesouro',
   ],
   ['Freelance', 'freelance|prestacao de servico|honorarios'],
   ['Presentes', 'gift|presente'],
@@ -187,9 +185,7 @@ export function toBrazilDate(iso: string): string | null {
     date.getUTCSeconds() === 0 &&
     date.getUTCMilliseconds() === 0;
 
-  const base = isMidnightUtc
-    ? date
-    : new Date(date.getTime() - 3 * 60 * 60 * 1000);
+  const base = isMidnightUtc ? date : new Date(date.getTime() - 3 * 60 * 60 * 1000);
 
   return base.toISOString().slice(0, 10);
 }
@@ -227,10 +223,7 @@ export function suggestCategory(
 
 // Converte uma transação do Pluggy em um lançamento do FinTrack
 // (ou explica por que pular).
-export function mapTransaction(
-  tx: PluggyTransaction,
-  kind: AccountKind,
-): MapResult {
+export function mapTransaction(tx: PluggyTransaction, kind: AccountKind): MapResult {
   if (tx.status === 'PENDING') return { skip: 'pending' };
   if (tx.currencyCode !== 'BRL') return { skip: 'foreign_currency' };
 
@@ -245,19 +238,11 @@ export function mapTransaction(
   const text = normalize(tx.description);
 
   // Evita contar duas vezes: a compra no cartão já é uma despesa.
-  if (
-    kind === 'BANK' &&
-    type === 'expense' &&
-    BILL_PAYMENT_ON_BANK.test(text)
-  ) {
+  if (kind === 'BANK' && type === 'expense' && BILL_PAYMENT_ON_BANK.test(text)) {
     return { skip: 'card_bill_payment' };
   }
 
-  if (
-    kind === 'CREDIT' &&
-    type === 'income' &&
-    PAYMENT_ON_CARD.test(text)
-  ) {
+  if (kind === 'CREDIT' && type === 'income' && PAYMENT_ON_CARD.test(text)) {
     return { skip: 'card_payment_received' };
   }
 
@@ -306,12 +291,10 @@ export function describeItemProblem(
 
   if (status === 'LOGIN_ERROR') {
     const byExecution: Record<string, string> = {
-      USER_AUTHORIZATION_NOT_GRANTED:
-        'Você não autorizou o compartilhamento dos dados.',
+      USER_AUTHORIZATION_NOT_GRANTED: 'Você não autorizou o compartilhamento dos dados.',
       USER_AUTHORIZATION_REVOKED:
         'O consentimento foi revogado no banco. Conecte novamente.',
-      INVALID_CREDENTIALS:
-        'As credenciais informadas são inválidas.',
+      INVALID_CREDENTIALS: 'As credenciais informadas são inválidas.',
     };
 
     return {

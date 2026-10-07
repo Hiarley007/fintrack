@@ -7,11 +7,7 @@ import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { Screen } from '@/components/Screen';
 import { ErrorState, LoadingView } from '@/components/StateViews';
-import {
-  useBankConnections,
-  useDisconnectBank,
-  useSyncBank,
-} from '@/hooks/useBanks';
+import { useBankConnections, useDisconnectBank, useSyncBank } from '@/hooks/useBanks';
 import { OPEN_FINANCE_SANDBOX } from '@/lib/config';
 import { colors, radius, spacing } from '@/theme';
 import { friendlyError } from '@/utils/errors';
@@ -40,8 +36,7 @@ export default function BanksScreen() {
             ? `${result.imported} lançamentos novos importados.`
             : 'Nenhum lançamento novo desde a última sincronização.',
         ),
-      onError: (e) =>
-        Alert.alert('Não foi possível sincronizar', friendlyError(e)),
+      onError: (e) => Alert.alert('Não foi possível sincronizar', friendlyError(e)),
       onSettled: () => setSyncingItem(null),
     });
   }
@@ -82,11 +77,7 @@ export default function BanksScreen() {
 
         <Card>
           <View style={styles.privacyHeader}>
-            <Ionicons
-              name="shield-checkmark"
-              size={20}
-              color={colors.primary}
-            />
+            <Ionicons name="shield-checkmark" size={20} color={colors.primary} />
 
             <Text style={styles.privacyTitle}>Somente leitura</Text>
           </View>
@@ -114,10 +105,7 @@ export default function BanksScreen() {
           ))
         )}
 
-        <Button
-          title="Conectar um banco"
-          onPress={() => router.push('/banks/connect')}
-        />
+        <Button title="Conectar um banco" onPress={() => router.push('/banks/connect')} />
       </ScrollView>
     </Screen>
   );

@@ -15,12 +15,9 @@ export async function listConnections(): Promise<BankConnection[]> {
 
 // Pede ao servidor um Connect Token (o segredo do Pluggy nunca fica no app).
 export async function requestConnectToken(redirectUri: string): Promise<string> {
-  const data = await invokeFunction<{ connect_token: string }>(
-    'bank-connect-token',
-    {
-      redirect_uri: redirectUri,
-    },
-  );
+  const data = await invokeFunction<{ connect_token: string }>('bank-connect-token', {
+    redirect_uri: redirectUri,
+  });
 
   return data.connect_token;
 }

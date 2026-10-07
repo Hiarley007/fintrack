@@ -2,7 +2,7 @@ import * as Linking from 'expo-linking';
 import { useRouter } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import { Alert, StyleSheet, Text, View } from 'react-native';
-import { PluggyConnect } from 'react-native-pluggy-connect';
+import { BankConnectWidget } from '@/components/BankConnectWidget';
 import { ErrorState, LoadingView } from '@/components/StateViews';
 import { useConnectToken, useSyncBank } from '@/hooks/useBanks';
 import { OPEN_FINANCE_SANDBOX } from '@/lib/config';
@@ -12,22 +12,17 @@ import { friendlyError } from '@/utils/errors';
 export default function ConnectBankScreen() {
   const router = useRouter();
 
-  // Endereço para onde o banco devolve o usuário depois de autorizar (deep link do app).
+  // Endereço de retorno após a autorização.
   const redirectUri = useMemo(() => Linking.createURL('banks/callback'), []);
 
-  const {
-    data: connectToken,
-    isError,
-    error,
-    refetch,
-  } = useConnectToken(redirectUri);
+  const { data: connectToken, isError, error, refetch } = useConnectToken(redirectUri);
 
   const sync = useSyncBank();
   const [importing, setImporting] = useState(false);
 
   const handleSuccess = useCallback(
     async (data: { item: { id: string } }) => {
-      setImporting(true); // desmonta o widget e mostra o progresso
+      setImporting(true);
 
       try {
         const result = await sync.mutateAsync(data.item.id);
@@ -53,6 +48,7 @@ export default function ConnectBankScreen() {
   const handleError = useCallback(
     (e: { message: string }) => {
       Alert.alert('Não foi possível conectar', e.message || 'Tente novamente.');
+
       router.back();
     },
     [router],
@@ -71,15 +67,13 @@ export default function ConnectBankScreen() {
       <View style={styles.importing}>
         <LoadingView />
 
-        <Text style={styles.importingText}>
-          Importando seus lançamentos...
-        </Text>
+        <Text style={styles.importingText}>Importando seus lançamentos...</Text>
       </View>
     );
   }
 
   return (
-    <PluggyConnect
+    <BankConnectWidget
       connectToken={connectToken}
       includeSandbox={OPEN_FINANCE_SANDBOX}
       onSuccess={handleSuccess}

@@ -1,11 +1,5 @@
 // Revoga o acesso ao banco: apaga a conexão no Pluggy e os dados importados.
-import {
-  HttpError,
-  handle,
-  json,
-  readBody,
-  requireUser,
-} from '../_shared/http.ts';
+import { HttpError, handle, json, readBody, requireUser } from '../_shared/http.ts';
 import { deleteItem, getApiKey } from '../_shared/pluggy.ts';
 
 Deno.serve(

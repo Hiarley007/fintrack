@@ -12,9 +12,7 @@ export interface DateRange {
 
 // ─── Consultas ───────────────────────────────────────────────────────────────
 
-export async function listTransactions(
-  range?: DateRange,
-): Promise<Transaction[]> {
+export async function listTransactions(range?: DateRange): Promise<Transaction[]> {
   let query = supabase
     .from('transactions')
     .select(SELECT)
@@ -57,19 +55,13 @@ export async function updateTransaction(
   id: string,
   input: TransactionInput,
 ): Promise<void> {
-  const { error } = await supabase
-    .from('transactions')
-    .update(input)
-    .eq('id', id);
+  const { error } = await supabase.from('transactions').update(input).eq('id', id);
 
   if (error) throw error;
 }
 
 export async function deleteTransaction(id: string): Promise<void> {
-  const { error } = await supabase
-    .from('transactions')
-    .delete()
-    .eq('id', id);
+  const { error } = await supabase.from('transactions').delete().eq('id', id);
 
   if (error) throw error;
 }

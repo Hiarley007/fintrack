@@ -24,10 +24,7 @@ export function BankConnectionCard({
     <View style={styles.card}>
       <View style={styles.header}>
         {connection.institution_image_url ? (
-          <Image
-            source={{ uri: connection.institution_image_url }}
-            style={styles.logo}
-          />
+          <Image source={{ uri: connection.institution_image_url }} style={styles.logo} />
         ) : (
           <View style={[styles.logo, styles.logoFallback]}>
             <Ionicons name="business" size={22} color={colors.primary} />

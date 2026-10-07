@@ -1,0 +1,1 @@
+export { PluggyConnect as BankConnectWidget } from 'react-pluggy-connect';

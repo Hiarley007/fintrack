@@ -52,8 +52,7 @@ export default function EditTransactionScreen() {
               { id: data.id, categoryId },
               {
                 onSuccess: () => router.back(),
-                onError: (e) =>
-                  Alert.alert('Não foi possível salvar', friendlyError(e)),
+                onError: (e) => Alert.alert('Não foi possível salvar', friendlyError(e)),
               },
             )
           }
@@ -73,8 +72,7 @@ export default function EditTransactionScreen() {
             { id, input },
             {
               onSuccess: () => router.back(),
-              onError: (e) =>
-                Alert.alert('Não foi possível salvar', friendlyError(e)),
+              onError: (e) => Alert.alert('Não foi possível salvar', friendlyError(e)),
             },
           )
         }

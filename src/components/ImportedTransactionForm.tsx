@@ -44,10 +44,7 @@ export function ImportedTransactionForm({
         <Text style={styles.description}>{transaction.description}</Text>
 
         <Text
-          style={[
-            styles.amount,
-            { color: isIncome ? colors.income : colors.expense },
-          ]}
+          style={[styles.amount, { color: isIncome ? colors.income : colors.expense }]}
         >
           {isIncome ? '+ ' : '- '}
           {formatMoney(transaction.amount)}
@@ -80,9 +77,7 @@ export function ImportedTransactionForm({
                 color={selected ? '#FFFFFF' : category.color}
               />
 
-              <Text
-                style={[styles.chipText, selected && styles.chipTextSelected]}
-              >
+              <Text style={[styles.chipText, selected && styles.chipTextSelected]}>
                 {category.name}
               </Text>
             </Pressable>
