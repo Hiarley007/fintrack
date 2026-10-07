@@ -1,8 +1,7 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Alert, Platform } from 'react-native';
-
-import { Screen } from '@/components/Screen';
+import { Alert } from 'react-native';
 import { ImportedTransactionForm } from '@/components/ImportedTransactionForm';
+import { Screen } from '@/components/Screen';
 import { ErrorState, LoadingView } from '@/components/StateViews';
 import { TransactionForm } from '@/components/TransactionForm';
 import {
@@ -13,22 +12,9 @@ import {
 } from '@/hooks/useTransactions';
 import { friendlyError } from '@/utils/errors';
 
-// ─── Helpers (funcionam no web e no celular) ─────────────────────────────────
-
-function showMessage(title: string, message?: string) {
-  if (Platform.OS === 'web') {
-    window.alert(message ? `${title}\n\n${message}` : title);
-    return;
-  }
-  Alert.alert(title, message);
-}
-
-// ─── Tela ────────────────────────────────────────────────────────────────────
-
 export default function EditTransactionScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-
   const { data, isLoading, isError, error, refetch } = useTransaction(id);
   const save = useSaveTransaction();
   const remove = useDeleteTransaction();
@@ -40,24 +26,18 @@ export default function EditTransactionScreen() {
     return <ErrorState message={friendlyError(error)} onRetry={refetch} />;
   }
 
-  function doDelete() {
-    remove.mutate(id, {
-      onSuccess: () => router.back(),
-      onError: (e) => showMessage('Erro ao excluir', friendlyError(e)),
-    });
-  }
-
   function confirmDelete() {
-    if (Platform.OS === 'web') {
-      if (window.confirm('Excluir lançamento\n\nEssa ação não pode ser desfeita.')) {
-        doDelete();
-      }
-      return;
-    }
-
     Alert.alert('Excluir lançamento', 'Essa ação não pode ser desfeita.', [
       { text: 'Cancelar', style: 'cancel' },
-      { text: 'Excluir', style: 'destructive', onPress: doDelete },
+      {
+        text: 'Excluir',
+        style: 'destructive',
+        onPress: () =>
+          remove.mutate(id, {
+            onSuccess: () => router.back(),
+            onError: (e) => Alert.alert('Erro ao excluir', friendlyError(e)),
+          }),
+      },
     ]);
   }
 
@@ -72,7 +52,8 @@ export default function EditTransactionScreen() {
               { id: data.id, categoryId },
               {
                 onSuccess: () => router.back(),
-                onError: (e) => showMessage('Não foi possível salvar', friendlyError(e)),
+                onError: (e) =>
+                  Alert.alert('Não foi possível salvar', friendlyError(e)),
               },
             )
           }
@@ -92,7 +73,8 @@ export default function EditTransactionScreen() {
             { id, input },
             {
               onSuccess: () => router.back(),
-              onError: (e) => showMessage('Não foi possível salvar', friendlyError(e)),
+              onError: (e) =>
+                Alert.alert('Não foi possível salvar', friendlyError(e)),
             },
           )
         }
