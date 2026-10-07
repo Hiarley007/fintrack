@@ -9,22 +9,13 @@ import { OPEN_FINANCE_SANDBOX } from '@/lib/config';
 import { colors, spacing } from '@/theme';
 import { friendlyError } from '@/utils/errors';
 
-
 export default function ConnectBankScreen() {
   const router = useRouter();
 
   // Endereço de retorno após a autorização.
-  const redirectUri = useMemo(
-    () => Linking.createURL('banks/callback'),
-    [],
-  );
+  const redirectUri = useMemo(() => Linking.createURL('banks/callback'), []);
 
-  const {
-    data: connectToken,
-    isError,
-    error,
-    refetch,
-  } = useConnectToken(redirectUri);
+  const { data: connectToken, isError, error, refetch } = useConnectToken(redirectUri);
 
   const sync = useSyncBank();
   const [importing, setImporting] = useState(false);
@@ -56,10 +47,7 @@ export default function ConnectBankScreen() {
 
   const handleError = useCallback(
     (e: { message: string }) => {
-      Alert.alert(
-        'Não foi possível conectar',
-        e.message || 'Tente novamente.',
-      );
+      Alert.alert('Não foi possível conectar', e.message || 'Tente novamente.');
 
       router.back();
     },
@@ -79,9 +67,7 @@ export default function ConnectBankScreen() {
       <View style={styles.importing}>
         <LoadingView />
 
-        <Text style={styles.importingText}>
-          Importando seus lançamentos...
-        </Text>
+        <Text style={styles.importingText}>Importando seus lançamentos...</Text>
       </View>
     );
   }

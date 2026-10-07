@@ -120,7 +120,6 @@ export async function listTransactions(
       nextCursor?: string | null;
     }>(`/v2/transactions?${query}`, {}, apiKey);
 
-
     all.push(...(data.results ?? []));
 
     if (!data.nextCursor) break;
