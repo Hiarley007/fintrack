@@ -164,10 +164,11 @@ O módulo `supabase/functions/_shared/openfinance.ts` contém regras puras compa
 
 ## Estrutura de arquivos
 
-Estrutura resumida da implementação final apresentada no guia:
+Estrutura resumida do repositório:
 
 ```text
 fintrack/
+├── __test__/                  # date, money, openfinance e summary (*.test.ts)
 ├── app/
 │   ├── _layout.tsx
 │   ├── (auth)/
@@ -188,34 +189,46 @@ fintrack/
 │           ├── index.tsx
 │           ├── connect.tsx
 │           └── callback.tsx
+├── assets/
+├── patches/
 ├── src/
-│   ├── components/
+│   ├── components/            # Button, Card, DonutChart, Fab, FormInput, Input,
+│   │                          # MonthSwitcher, Screen, StateViews, SummaryCards,
+│   │                          # TransactionForm, TransactionItem,
+│   │                          # BankConnectionCard, BankConnectWidget, etc.
 │   ├── context/AuthContext.tsx
 │   ├── hooks/                 # useBanks, useCategories, useTransactions
-│   ├── lib/                   # config, supabase, queryClient
+│   ├── lib/                   # config, queryClient, supabase
 │   ├── schemas/               # auth, transaction
-│   ├── services/              # banks, categories, functions, transactions
-│   ├── theme/
-│   ├── types/
+│   ├── services/              # banks, categories, functions, transaction
+│   ├── theme/index.ts
+│   ├── types/index.ts
 │   └── utils/                 # csv, date, errors, icons, money, summary
 ├── supabase/
+│   ├── config.toml
 │   ├── schema.sql
-│   ├── open-finance.sql
+│   ├── open_finance.sql
 │   └── functions/
+│       ├── deno.json
+│       ├── deno.lock
 │       ├── _shared/           # http.ts, pluggy.ts, openfinance.ts
 │       ├── bank-connect-token/index.ts
 │       ├── bank-sync/index.ts
 │       └── bank-disconnect/index.ts
-├── __tests__/                 # money, date, summary, openfinance
 ├── .env.example
 ├── .prettierrc
+├── App.tsx
+├── AGENTS.md
 ├── app.json
+├── eas.json
+├── index.ts
+├── LICENSE
 ├── package.json
 ├── tsconfig.json
 └── README.md
 ```
 
-O arquivo `.env` é local e deve ficar fora do Git. O `eas.json` é acrescentado ao configurar o build opcional.
+Arquivos locais e fora do Git: `.env`, `node_modules/` e `supabase/.temp/`. O `eas.json` define os perfis de build do EAS.
 
 ## Telas e navegação
 
@@ -312,9 +325,11 @@ A identificação depende de padrões de descrição. Portanto, novos formatos d
 
 ### Sincronização idempotente
 
-A primeira sincronização busca uma janela de **90 dias**. As seguintes começam **7 dias antes da última sincronização**, permitindo capturar movimentações confirmadas com atraso.
+O guia prevê que a primeira sincronização busque uma janela de **90 dias** e que as seguintes comecem **7 dias antes da última sincronização**, permitindo capturar movimentações confirmadas com atraso.
 
-A combinação de chave única e `upsert` com `ignoreDuplicates` faz com que registros já importados sejam ignorados. Isso preserva a categoria corrigida pelo usuário e impede duplicações mesmo quando os períodos de busca se sobrepõem.
+> **Estado atual da implementação:** o Pluggy descontinuou o endpoint `GET /transactions` (resposta 410 `ENDPOINT_DEPRECATED`). A função `listTransactions` foi migrada para `GET /v2/transactions`, que usa paginação por cursor e **não aceita** os parâmetros `from`, `to` e `pageSize`. Por isso, a busca atual envia apenas `accountId` (e `cursor` nas páginas seguintes) e traz o histórico disponível a cada sincronização, sem aplicar a janela de 90/7 dias. A janela só poderá ser reaplicada depois de confirmar na documentação do v2 os nomes dos parâmetros de data.
+
+A combinação de chave única e `upsert` com `ignoreDuplicates` faz com que registros já importados sejam ignorados. Isso preserva a categoria corrigida pelo usuário e impede duplicações mesmo quando os períodos de busca se sobrepõem ou quando o histórico completo é reprocessado.
 
 **Limite dessa escolha:** registros existentes não são atualizados automaticamente por esse fluxo. Uma alteração posterior feita pelo banco em uma transação já importada exige uma estratégia adicional de reconciliação.
 
@@ -330,6 +345,7 @@ As instruções pressupõem que o código do projeto, construído conforme o gui
 - Conta e projeto no Supabase.
 - Conta no Pluggy para habilitar a integração bancária.
 - Conta Expo/EAS para o build opcional.
+- Deno e a extensão **Deno** (`denoland.vscode-deno`) no VS Code, para editar as Edge Functions sem erros falsos no editor.
 
 Confira o ambiente:
 
@@ -337,6 +353,7 @@ Confira o ambiente:
 node -v
 npm -v
 git --version
+deno --version
 ```
 
 ### 2. Instalar dependências
@@ -358,11 +375,11 @@ npx expo install --fix
 Crie um projeto no Supabase e execute os scripts no SQL Editor, **nesta ordem**:
 
 1. `supabase/schema.sql`: categorias, lançamentos, permissões e políticas RLS.
-2. `supabase/open-finance.sql`: conexões bancárias e campos de importação.
+2. `supabase/open_finance.sql`: conexões bancárias e campos de importação.
 
 Para a versão final descrita neste README, aplique ambos os scripts mesmo que vá testar inicialmente apenas lançamentos manuais. A configuração do provedor Pluggy pode ser feita depois.
 
-Confira as 14 categorias iniciais e o RLS ativo nas tabelas. Os scripts são de criação do esquema; não presuma que podem ser reaplicados integralmente em um banco já configurado.
+Confira as 14 categorias iniciais e o RLS ativo nas tabelas. Os scripts são de criação do esquema; não presuma que podem ser reaplicados integralmente em um banco já configurado. Comandos avulsos (como `update bank_connections set last_synced_at = null;`) devem ser executados à parte, no SQL Editor, e não adicionados aos scripts de esquema.
 
 ### 4. Configurar variáveis públicas
 
@@ -409,6 +426,7 @@ npx expo start -c
 | `npm start` | Inicia o Expo. |
 | `npm run android` | Inicia o fluxo Android configurado no Expo. |
 | `npm run ios` | Inicia o fluxo iOS configurado no Expo. |
+| `npm run web` | Inicia o Expo para web. |
 | `npm test` | Executa os testes Jest. |
 | `npm run typecheck` | Verifica os tipos com `tsc --noEmit`. |
 | `npm run format` | Formata os arquivos com Prettier; altera arquivos. |
@@ -442,13 +460,15 @@ npm install react-native-pluggy-connect pluggy-js
 
 ### 2. Preparar o projeto Supabase na CLI
 
+Se o comando `supabase` não for encontrado, use a CLI via `npx` (como nos exemplos abaixo).
+
 ```bash
 npx supabase login
 npx supabase init
 npx supabase link --project-ref SEU-PROJECT-REF
 ```
 
-Execute `init` apenas se a configuração local da CLI ainda não existir. O identificador do projeto corresponde ao trecho `SEU-PROJECT-REF` da URL do Supabase.
+Execute `init` apenas se a configuração local da CLI ainda não existir. O identificador do projeto (Reference ID) está em **Project Settings → General** ou no trecho `SEU-PROJECT-REF` da URL do projeto no painel; não é o identificador da organização.
 
 ### 3. Cadastrar segredos e publicar funções
 
@@ -470,7 +490,9 @@ npx supabase functions list
 npx supabase secrets list
 ```
 
-Se o deploy solicitar Docker indisponível, o guia orienta acrescentar `--use-api` ao comando de publicação.
+Se o deploy solicitar Docker indisponível, o guia orienta acrescentar `--use-api` ao comando de publicação. O aviso "Docker is not running" por si só é inofensivo: a CLI envia os arquivos ao servidor.
+
+Os logs de cada função ficam em **Dashboard → Edge Functions → (função) → Logs**. É o lugar mais rápido para diagnosticar falhas do Pluggy, pois o app recebe apenas mensagens genéricas.
 
 ### Responsabilidade das funções
 
@@ -481,6 +503,16 @@ Se o deploy solicitar Docker indisponível, o guia orienta acrescentar `--use-ap
 | `bank-disconnect` | `connection_id` | Remover o Item no Pluggy e depois excluir a conexão local. |
 
 As funções validam a sessão com `auth.getUser` e usam um cliente Supabase com o token do usuário, preservando a aplicação do RLS. A sincronização compara `clientUserId` do Item com o identificador do usuário autenticado antes de importar.
+
+### Editar as Edge Functions no VS Code
+
+As funções rodam em Deno. O VS Code, por padrão, analisa os arquivos com o TypeScript comum e acusa `Cannot find name 'Deno'` e `Cannot find module 'npm:...'`. São erros do editor, não do deploy. Para eliminá-los:
+
+1. Instale a extensão **Deno** (autor *denoland*).
+2. Crie `supabase/functions/.vscode/settings.json` com `{ "deno.enable": true }`.
+3. Abra a pasta em janela própria: `code supabase/functions`.
+4. Exclua `supabase/functions` do `tsconfig.json` da raiz, para o `npm run typecheck` do app ignorá-las.
+5. Valide com `deno check supabase/functions/_shared/http.ts`.
 
 ### 4. Testar com Pluggy Bank
 
@@ -502,7 +534,7 @@ O guia descreve um fluxo com Meu Pluggy, uma conta bancária própria conectada 
 EXPO_PUBLIC_OPEN_FINANCE_SANDBOX=false
 ```
 
-Reinicie o Expo e compare valores e datas com o extrato da instituição. A variável, sozinha, não habilita acesso real: o funcionamento depende também da conta, dos conectores e das permissões no Pluggy.
+Reinicie o Expo e compare valores e datas com o extrato da instituição. A variável, sozinha, não habilita acesso real: o funcionamento depende também da conta, dos conectores e das permissões no Pluggy. Contas em modo trial podem retornar `TRIAL_CLIENT_ITEM_CREATE_NOT_ALLOWED` até que a liberação de dados reais seja solicitada e aprovada no painel do Pluggy.
 
 **Condições comerciais, limites e disponibilidade devem ser conferidos no provedor.** O guia distingue estudo com dados próprios de uso comercial com dados de terceiros; este README não garante gratuidade ou um plano específico.
 
@@ -515,6 +547,7 @@ Reinicie o Expo e compare valores e datas com o extrato da instituição. A vari
 - **Consentimento:** o widget conduz a autorização de acesso aos dados bancários.
 - **Somente leitura:** o projeto não implementa pagamentos ou transferências.
 - **Minimização:** o modelo proposto não persiste saldo bancário, CPF ou dados da contraparte.
+- **Logs:** evite registrar o conteúdo das respostas do Pluggy nos logs das funções (por exemplo, com `console.log` de depuração), pois contêm dados financeiros.
 - **Demonstrações:** utilizar dados fictícios e evitar exibir extratos pessoais.
 
 ### O que acontece ao desconectar
@@ -547,6 +580,8 @@ npm test
 ```
 
 **Resultado esperado segundo o guia:** nenhum erro de tipos e `46 passed, 46 total`. Registre aqui o resultado da execução no seu ambiente quando disponível. O guia também relata checagem das funções com Deno e empacotamento Android, sem substituir a validação do ambiente de quem implementa o projeto.
+
+> **Atenção ao nome da pasta de testes:** a pasta do repositório chama-se `__test__`. O script `format` do `package.json` deve apontar para o mesmo nome; se apontar para `__tests__`, o Prettier exibe `No files matching the pattern`. O Jest não é afetado, pois encontra arquivos `*.test.ts` em qualquer pasta.
 
 ### Checklist do app base
 
@@ -589,21 +624,43 @@ eas login
 eas build:configure
 ```
 
-Configure o perfil `preview` em `eas.json`:
+Configure o `eas.json` (já presente na raiz do projeto):
 
 ```json
 {
+  "cli": {
+    "version": ">= 24.11.0",
+    "appVersionSource": "remote"
+  },
   "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal"
+    },
     "preview": {
       "distribution": "internal",
       "android": { "buildType": "apk" },
       "environment": "preview"
+    },
+    "production": {
+      "autoIncrement": true
     }
+  },
+  "submit": {
+    "production": {}
   }
 }
 ```
 
-Cadastre no ambiente `preview` da Expo as variáveis públicas do Supabase e a opção de sandbox adequada à demonstração. Para dados reais, use `EXPO_PUBLIC_OPEN_FINANCE_SANDBOX=false`.
+O `.env` não vai para a nuvem (está no `.gitignore`). Cadastre as variáveis no painel da Expo (**expo.dev → projeto → Environment variables**), no ambiente `preview`, com visibilidade **Plain text**:
+
+| Nome | Valor |
+| --- | --- |
+| `EXPO_PUBLIC_SUPABASE_URL` | URL do projeto Supabase. |
+| `EXPO_PUBLIC_SUPABASE_KEY` | Chave anon ou publishable. |
+| `EXPO_PUBLIC_OPEN_FINANCE_SANDBOX` | `true` para demonstração; `false` somente se o Pluggy já liberou dados reais. |
+
+Os nomes precisam ser idênticos aos lidos pelo código, e as variáveis só entram em builds novos. Nunca cadastre `service_role` nem as credenciais do Pluggy aqui.
 
 ```bash
 eas build --platform android --profile preview
@@ -613,7 +670,7 @@ As credenciais do Pluggy permanecem no Supabase. Ajuste os identificadores Andro
 
 ## Problemas comuns
 
-| Sintoma | Verificação ou ação sugerida pelo guia |
+| Sintoma | Verificação ou ação sugerida |
 | --- | --- |
 | Variáveis do Supabase ausentes | Conferir `.env`, nomes das variáveis e reiniciar com `npx expo start -c`. |
 | `ERESOLVE` ao instalar | Conferir compatibilidade de `react` e `react-dom` antes de forçar resolução de dependências. |
@@ -624,22 +681,30 @@ As credenciais do Pluggy permanecem no Supabase. Ajuste os identificadores Andro
 | Lista vazia após salvar | Conferir o mês selecionado e as políticas de leitura. |
 | Duas telas para `/` | Remover a rota temporária `app/index.tsx` usada na construção inicial, se ainda existir. |
 | Jest não reconhece `describe` | Conferir os tipos Jest em `tsconfig.json`. |
+| `No files matching the pattern` no `npm run format` | O padrão do script aponta para uma pasta inexistente (`__tests__` em vez de `__test__`). Ajustar o script ou renomear a pasta. |
 | Integração não configurada | Conferir os segredos do Pluggy e a publicação das funções. |
 | Widget vazio ou com erro | Conferir sessão, logs de `bank-connect-token` e credenciais no servidor. |
 | Erro 403 de propriedade | Conferir se o Item foi criado com `clientUserId` do usuário atual. |
 | Erro 409 na sincronização | Aguardar o processamento do banco e tentar novamente. |
-| Nenhum lançamento importado | Conferir janela de datas e motivos de descarte retornados em `skipped`. |
-| Fatura duplicada | Revisar os padrões de identificação e adicionar um teste para a descrição encontrada. |
+| Banco conecta, mas nenhum lançamento é importado | Consultar os logs de `bank-sync` no painel do Supabase (a linha de erro expandida mostra a resposta original do Pluggy) e conferir `skipped` na resposta da função. |
+| Log com 410 `ENDPOINT_DEPRECATED` em `/transactions` | O Pluggy descontinuou `GET /transactions`. Usar `GET /v2/transactions` (paginação por cursor). |
+| Log com 400 "property from / to / pageSize should not exist" | O v2 não aceita os parâmetros do formato antigo. Enviar apenas `accountId` (e `cursor`), conforme a documentação atual. |
+| `TRIAL_CLIENT_ITEM_CREATE_NOT_ALLOWED` | Conta trial sem acesso a dados reais. Solicitar a liberação no painel do Pluggy ou usar o sandbox. |
+| QR Code do Inter não aparece no widget | No app do Inter, acessar Perfil → Autorizações → Acessar via QR Code e reiniciar a conexão. |
+| `Tried to register two views with the same name RNCWebView` | Verificar duplicações com `npm ls react-native-webview`, instalar com `npx expo install react-native-webview`, executar `npm dedupe` e reiniciar com `npx expo start --clear`. |
 | Retorno bancário não abre o app | Conferir `banks/callback.tsx` e o `scheme`. |
 | `USER_INPUT_TIMEOUT` no iPhone | O guia sugere testar `forceOauthInBrowser={false}`, observando a compatibilidade do conector. |
 | Erros de tipos nos módulos Deno | Conferir a separação entre a configuração do app e a das Edge Functions. |
+| `Cannot find name 'Deno'` ou `npm:` no editor | Instalar a extensão Deno (denoland), abrir `supabase/functions` em janela própria com `deno.enable: true` e excluir `supabase/functions` do `tsconfig.json` do app. São erros do editor, não do deploy. |
+| `supabase: comando não encontrado` | Usar `npx supabase ...`. |
+| `update ...` no terminal retorna "comando não encontrado" | Comandos SQL são executados no SQL Editor do Supabase, não no terminal. |
 
 ## Limitações e melhorias futuras
 
 ### Limites da implementação descrita
 
 - Somente transações em BRL entram na importação.
-- A primeira consulta cobre 90 dias, não todo o histórico bancário.
+- A busca usa `GET /v2/transactions` sem filtro de período: traz o histórico disponível a cada sincronização e o `ignoreDuplicates` evita duplicatas. A janela de 90/7 dias prevista no guia não está aplicada até que os parâmetros de data do v2 sejam confirmados.
 - A categorização é heurística e pode precisar de correção manual.
 - A identificação de pagamentos de fatura depende dos padrões implementados.
 - A sincronização insere novos registros; não reconcilia automaticamente alterações de registros existentes.
@@ -665,6 +730,7 @@ As credenciais do Pluggy permanecem no Supabase. Ajuste os identificadores Andro
 - [ ] Detecção de transferências entre contas próprias.
 - [ ] Importação de extratos OFX ou CSV.
 - [ ] Testes de contrato com respostas gravadas do agregador.
+- [ ] Reaplicar o filtro de período na busca do `GET /v2/transactions`.
 
 Esses itens são propostas de evolução, não funcionalidades confirmadas da versão descrita.
 
@@ -693,9 +759,8 @@ Para apresentar a implementação, prepare:
 - Resultado dos testes executados no repositório.
 - Instruções de configuração reproduzíveis e arquivos SQL versionados.
 - Contatos do autor (por exemplo, GitHub e LinkedIn).
-- Uma licença, se definida pelo responsável pelo repositório.
 
-Não há imagens, links de demonstração, contatos ou licença inventados neste README. Acrescente esses elementos quando estiverem disponíveis.
+Não há imagens ou links de demonstração inventados neste README. Acrescente esses elementos quando estiverem disponíveis.
 
 ## Autoria e créditos
 
@@ -714,4 +779,8 @@ Referências dentro do guia:
 - Páginas 115–118: README, build e portfólio.
 - Páginas 119–123: estrutura final, problemas comuns, evoluções e critérios de avaliação.
 
-**Licença:** o guia não define uma licença de software para o repositório. Defina uma, se necessário, junto ao professor orientador.
+**Licença:** consulte o arquivo [`LICENSE`](LICENSE) na raiz do repositório.
+
+## Autor
+
+Hiarley de Morais Rabêlo · [LinkedIn](https://www.linkedin.com/in/hiarley-morais-bbb360352) · [GitHub](https://github.com/Hiarley007)
