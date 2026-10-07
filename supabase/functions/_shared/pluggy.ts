@@ -101,34 +101,30 @@ export async function listAccounts(
   return data.results ?? [];
 }
 
-// Percorre todas as páginas de transações da conta no período.
+// Percorre todas as páginas de transações da conta (API v2, paginação por cursor).
+// o formato real do v2. REMOVER o console.log depois (imprime dados financeiros).
 export async function listTransactions(
   apiKey: string,
   accountId: string,
-  range: { from: string; to: string },
+  _range: { from: string; to: string },
 ): Promise<PluggyTransaction[]> {
-  const pageSize = 500;
   const all: PluggyTransaction[] = [];
+  let cursor: string | undefined;
 
   for (let page = 1; page <= 20; page++) {
-    const query = new URLSearchParams({
-      accountId,
-      from: range.from,
-      to: range.to,
-      pageSize: String(pageSize),
-      page: String(page),
-    });
+    const query = new URLSearchParams({ accountId });
+    if (cursor) query.set('cursor', cursor);
 
-    const data = await request<{ results: PluggyTransaction[]; totalPages?: number }>(
-      `/transactions?${query}`,
-      {},
-      apiKey,
-    );
+    const data = await request<{
+      results: PluggyTransaction[];
+      nextCursor?: string | null;
+    }>(`/v2/transactions?${query}`, {}, apiKey);
+
 
     all.push(...(data.results ?? []));
 
-    if ((data.results ?? []).length < pageSize || page >= (data.totalPages ?? page))
-      break;
+    if (!data.nextCursor) break;
+    cursor = data.nextCursor;
   }
 
   return all;

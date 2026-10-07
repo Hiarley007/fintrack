@@ -1,0 +1,21 @@
+diff --git a/node_modules/react-native-pluggy-connect/src/index.tsx b/node_modules/react-native-pluggy-connect/src/index.tsx
+index 401390d..f693937 100644
+--- a/node_modules/react-native-pluggy-connect/src/index.tsx
++++ b/node_modules/react-native-pluggy-connect/src/index.tsx
+@@ -8,7 +8,7 @@ import {
+ } from 'pluggy-connect-sdk';
+ import isEqual from 'lodash.isequal';
+ import React, { useCallback, useEffect, useRef, useState } from 'react';
+-import { SafeAreaView, StyleSheet } from 'react-native';
++import { StyleSheet } from 'react-native';
+ import { WebView } from 'react-native-webview';
+ import {
+   buildConnectUrl,
+@@ -20,6 +20,7 @@ import {
+ import { Connector, ExecutionStatus, Item, ItemStatus } from 'pluggy-js';
+ import { ConnectWebView } from './components/ConnectWebView';
+ import { OauthWebView } from './components/OauthWebView';
++import { SafeAreaView } from 'react-native-safe-area-context';
+ 
+ /*! re-export PluggyConnectProps, to keep the same interface */
+ /* TODO: omitting 'onHide' props as it is yet not supported in this react-native wrapper */
